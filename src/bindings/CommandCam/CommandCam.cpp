@@ -89,6 +89,22 @@ void exit_message(const char* error_message, int error)
 	exit(error);
 }
 
+char* rot90(char* buffer, LONG sx, LONG sy, LONG bc) {
+	char* res = (char* )malloc(sx * sy * bc);
+
+	for (int y = 0; y < sy; y++) {
+		for (int x = 0; x < sx; x++) {
+			size_t addr_src = (y * sx + x) * bc;			
+			size_t addr_dst = (x * sy + y) * bc; //size_t addr_dst = ((sx - 1 - x) * sy + y) * bc;
+			for (int pos = 0; pos < bc; pos++) {
+				res[addr_dst + pos] = buffer[addr_src + pos];
+			}
+		}
+	}
+	free((void*)buffer);
+	return res;
+}
+
 int main(int argc, char **argv)
 {
 	// Capture settings
