@@ -498,7 +498,12 @@ int main(int argc, char **argv)
 		// Get video info header structure from media type
 		pVih = (VIDEOINFOHEADER*)mt.pbFormat;
 
-        //pVih->bmiHeader.biWidth = 4000;
+		if (new_camera_bugfix) {
+			pBuffer = rot90(pBuffer, pVih->bmiHeader.biWidth, pVih->bmiHeader.biHeight, pVih->bmiHeader.biBitCount / 8);
+			LONG tmp = pVih->bmiHeader.biWidth;
+			pVih->bmiHeader.biWidth = pVih->bmiHeader.biHeight;
+			pVih->bmiHeader.biHeight = tmp;
+		}
 
 		// Print the resolution of the captured image
 		fprintf(stderr, "Capture resolution: %dx%d\n",
