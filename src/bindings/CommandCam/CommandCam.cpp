@@ -336,6 +336,8 @@ int main(int argc, char **argv)
 	hr = pPropBag->Read(L"FriendlyName", &var, 0);
 	fprintf(stderr, "Capture device: %ls\n", var.bstrVal);
 	VariantClear(&var);
+	bool new_camera_bugfix = (wcscmp(var.bstrVal, L"HD USB Camera") == 0);
+	fprintf(stderr, "new_camera_bugfix: %s\n", new_camera_bugfix ? "YES" : "no");
 
 	// Create capture filter and add to graph
 	hr = pMoniker->BindToObject(0, 0,
