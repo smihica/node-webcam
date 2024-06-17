@@ -510,6 +510,9 @@ int main(int argc, char **argv)
 			pVih->bmiHeader.biWidth,
 			pVih->bmiHeader.biHeight);
 
+		fprintf(stderr, "biBitCount: %d\n",
+			pVih->bmiHeader.biBitCount);
+
 		// Create bitmap structure
 		long cbBitmapInfoSize = mt.cbFormat - SIZE_PREHEADER;
 		BITMAPFILEHEADER bfh;
