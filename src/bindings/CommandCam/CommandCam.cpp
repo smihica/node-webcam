@@ -89,6 +89,22 @@ void exit_message(const char* error_message, int error)
 	exit(error);
 }
 
+char* rot90(char* buffer, LONG sx, LONG sy, LONG bc) {
+	char* res = (char* )malloc(sx * sy * bc);
+
+	for (int y = 0; y < sy; y++) {
+		for (int x = 0; x < sx; x++) {
+			size_t addr_src = (y * sx + x) * bc;			
+			size_t addr_dst = (x * sy + y) * bc; //size_t addr_dst = ((sx - 1 - x) * sy + y) * bc;
+			for (int pos = 0; pos < bc; pos++) {
+				res[addr_dst + pos] = buffer[addr_src + pos];
+			}
+		}
+	}
+	free((void*)buffer);
+	return res;
+}
+
 int main(int argc, char **argv)
 {
 	// Capture settings
@@ -336,6 +352,10 @@ int main(int argc, char **argv)
 	hr = pPropBag->Read(L"FriendlyName", &var, 0);
 	fprintf(stderr, "Capture device: %ls\n", var.bstrVal);
 	VariantClear(&var);
+	bool new_camera_bugfix = (wcscmp(var.bstrVal, L"HD USB Camera") == 0);
+	fprintf(stderr, "new_camera_bugfix: %s\n", new_camera_bugfix ? "YES" : "no");
+	if (new_camera_bugfix)
+		snapshot_delay += 1000;
 
 	// Create capture filter and add to graph
 	hr = pMoniker->BindToObject(0, 0,
@@ -478,12 +498,20 @@ int main(int argc, char **argv)
 		// Get video info header structure from media type
 		pVih = (VIDEOINFOHEADER*)mt.pbFormat;
 
-        //pVih->bmiHeader.biWidth = 4000;
+		if (new_camera_bugfix) {
+			pBuffer = rot90(pBuffer, pVih->bmiHeader.biWidth, pVih->bmiHeader.biHeight, pVih->bmiHeader.biBitCount / 8);
+			LONG tmp = pVih->bmiHeader.biWidth;
+			pVih->bmiHeader.biWidth = pVih->bmiHeader.biHeight;
+			pVih->bmiHeader.biHeight = tmp;
+		}
 
 		// Print the resolution of the captured image
 		fprintf(stderr, "Capture resolution: %dx%d\n",
 			pVih->bmiHeader.biWidth,
 			pVih->bmiHeader.biHeight);
+
+		fprintf(stderr, "biBitCount: %d\n",
+			pVih->bmiHeader.biBitCount);
 
 		// Create bitmap structure
 		long cbBitmapInfoSize = mt.cbFormat - SIZE_PREHEADER;
